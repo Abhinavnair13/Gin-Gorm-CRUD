@@ -21,26 +21,23 @@ func NewBlogController(service services.BlogService) *BlogController {
 
 // BlogsCreate handles the creation of a new blog post
 func (bc *BlogController) BlogsCreate(c *gin.Context) {
-
 	var body struct {
+		//making title and body required for the body
 		Title string `json:"title" binding:"required"`
 		Body  string `json:"body" binding:"required"`
 	}
 
-	// Bind JSON input to the struct
 	if err := c.ShouldBindJSON(&body); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Use the service to create a new blog
 	blog, err := bc.Service.CreateBlog(body.Title, body.Body)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create blog"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Respond with the created blog
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Successfully created blog",
 		"blog":    blog,
@@ -70,13 +67,12 @@ func (bc *BlogController) BlogsGetByID(c *gin.Context) {
 		return
 	}
 
-	// Use the service to get the blog by ID
 	blog, err := bc.Service.GetBlogByID(uint(id))
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Blog not found"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
+	// Respond with the created blog
 	c.JSON(http.StatusOK, gin.H{
 		"blog": blog,
 	})
@@ -110,7 +106,7 @@ func (bc *BlogController) BlogUpdate(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update blog"})
 		return
 	}
-
+	// Respond with the created blog
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Successfully updated blog",
 		"blog":    blog,
