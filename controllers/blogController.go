@@ -1,26 +1,25 @@
 package controllers
 
 import (
+	Service "gin-gorm-crud/services"
 	"net/http"
 	"strconv"
-
-	"gin-gorm-crud/services"
 
 	"github.com/gin-gonic/gin"
 )
 
 // BlogController handles HTTP requests related to blogs
 type BlogController struct {
-	Service services.BlogService
 }
 
+// blogService := services.NewBlogService()
 // NewBlogController creates a new instance of BlogController
-func NewBlogController(service services.BlogService) *BlogController {
-	return &BlogController{Service: service}
+func NewBlogController() *BlogController {
+	return &BlogController{}
 }
 
 // BlogsCreate handles the creation of a new blog post
-func (bc *BlogController) BlogsCreate(c *gin.Context) {
+func BlogsCreate(c *gin.Context) {
 	var body struct {
 		//making title and body required for the body
 		Title string `json:"title" binding:"required"`
@@ -32,7 +31,7 @@ func (bc *BlogController) BlogsCreate(c *gin.Context) {
 		return
 	}
 
-	blog, err := bc.Service.CreateBlog(body.Title, body.Body)
+	blog, err := Service.CreateBlog(body.Title, body.Body)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -45,8 +44,8 @@ func (bc *BlogController) BlogsCreate(c *gin.Context) {
 }
 
 // BlogsIndex handles fetching all blog posts
-func (bc *BlogController) BlogsIndex(c *gin.Context) {
-	blogs, err := bc.Service.GetAllBlogs()
+func BlogsIndex(c *gin.Context) {
+	blogs, err := Service.GetAllBlogs()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve blogs"})
 		return
@@ -58,7 +57,7 @@ func (bc *BlogController) BlogsIndex(c *gin.Context) {
 }
 
 // BlogsGetByID handles fetching a single blog post by ID
-func (bc *BlogController) BlogsGetByID(c *gin.Context) {
+func BlogsGetByID(c *gin.Context) {
 	// Get the ID from the URL parameters
 	idParam := c.Param("id")
 	id, err := strconv.Atoi(idParam)
@@ -67,7 +66,7 @@ func (bc *BlogController) BlogsGetByID(c *gin.Context) {
 		return
 	}
 
-	blog, err := bc.Service.GetBlogByID(uint(id))
+	blog, err := Service.GetBlogByID(uint(id))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -79,7 +78,7 @@ func (bc *BlogController) BlogsGetByID(c *gin.Context) {
 }
 
 // BlogUpdate handles updating an existing blog post
-func (bc *BlogController) BlogUpdate(c *gin.Context) {
+func BlogUpdate(c *gin.Context) {
 	// Get the ID from the URL parameters
 	idParam := c.Param("id")
 	id, err := strconv.Atoi(idParam)
@@ -101,7 +100,7 @@ func (bc *BlogController) BlogUpdate(c *gin.Context) {
 	}
 
 	// Use the service to update the blog
-	blog, err := bc.Service.UpdateBlog(uint(id), body.Title, body.Body)
+	blog, err := Service.UpdateBlog(uint(id), body.Title, body.Body)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update blog"})
 		return
@@ -114,7 +113,7 @@ func (bc *BlogController) BlogUpdate(c *gin.Context) {
 }
 
 // DeleteBlog handles deleting a blog post by ID
-func (bc *BlogController) DeleteBlog(c *gin.Context) {
+func DeleteBlog(c *gin.Context) {
 	// Get the ID from the URL parameters
 	idParam := c.Param("id")
 	id, err := strconv.Atoi(idParam)
@@ -124,7 +123,7 @@ func (bc *BlogController) DeleteBlog(c *gin.Context) {
 	}
 
 	// Use the service to delete the blog
-	if err := bc.Service.DeleteBlog(uint(id)); err != nil {
+	if err := Service.DeleteBlog(uint(id)); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete blog"})
 		return
 	}

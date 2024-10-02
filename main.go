@@ -5,7 +5,6 @@ import (
 	"gin-gorm-crud/controllers"
 	initializers "gin-gorm-crud/initializers"
 	"gin-gorm-crud/routes"
-	"gin-gorm-crud/services"
 
 	"github.com/gin-gonic/gin"
 )
@@ -19,11 +18,12 @@ func main() {
 	router := gin.Default()
 
 	// Initialize services and controllers
-	blogService := services.NewBlogService()
-	blogController := controllers.NewBlogController(blogService)
+
+	blogController := controllers.NewBlogController()
 
 	// Setup routes
-	routes.SetupRouter(router, blogController)
+	server := routes.NewServer(router)
+	server.AddRoutes(blogController)
 
 	router.Run()
 }
